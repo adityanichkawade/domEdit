@@ -6,6 +6,6 @@ Inplace editor for editing the text or html on the fly.
 
 Provide the css class for editor to style the inplace editor
 
-### $('body').domEdit({
-###  editorClass: 'editor'
-### });
+$('body').domEdit({
+  editorClass: 'editor'
+});
