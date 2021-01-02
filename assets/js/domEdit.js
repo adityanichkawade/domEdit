@@ -14,15 +14,15 @@
         return {
             left: offset.left,
             top: offset.top,
-            width: $aTargetElement.outerWidth(),
-            minHeight: $aTargetElement.outerHeight()
+            width: $aTargetElement.width(),
+            height: $aTargetElement.height()
         };
     }
 
 
     function closeDomEditor(e) {
         $editor.remove();
-        
+
         if ($currentTargetElement) {
             $currentTargetElement.html($editor.val());
         }
@@ -35,41 +35,26 @@
         preventDefaultEvents(e);
     }
 
-    function setEditorStyle($element) {
+    function setEditorStyle($element, opts) {
         $editor.css(getTargetElementBoundingRect($element));
-        
         $editor.css('font-size', $element.css('font-size'));
         $editor.css('font-weight', $element.css('font-weight'));
         $editor.css('text-align', $element.css('text-align'));
         $editor.css('font-family', $element.css('font-family'));
+        $editor.css('padding', $element.css('padding'));
         $editor.css('position', 'absolute');
+
+        if (opts && opts.onSetEditorStyle) {
+            opts.onSetEditorStyle($editor, $element);
+        }
     }
-    
+
     function setEditorState($element) {
         $editor.val($element.html());
         $editor.select();
         $editor.focus();
         $editor.click(editorClick);
         $editor.blur(closeDomEditor);
-    }
-
-    function targetElementDblClick(e) {
-        preventDefaultEvents(e);
-        var target = e.target;
-        var $body = $(document.body);
-    
-        if (target === $editor[0] || target === document.body || !$body.has(target)) return;
-        
-        var $element = $(target);
-
-        if (!$editor.parent().length) {
-            $body.append($editor);
-        }
-
-        setEditorStyle($element);
-        setEditorState($element);
-        //$(document).on('click', closeDomEditor);
-        $currentTargetElement = $element;
     }
 
     $.fn.domEdit = function (options) {
@@ -81,7 +66,24 @@
         $editor.addClass(opts.editorClass);
 
         return this.each(function (idx, element) {
-            $(element).dblclick(targetElementDblClick);
+            $(element).dblclick(function (e) {
+                preventDefaultEvents(e);
+                var target = e.target;
+                var $body = $(document.body);
+
+                if (target === $editor[0] || target === document.body || !$body.has(target)) return;
+
+                var $element = $(target);
+
+                if (!$editor.parent().length) {
+                    $body.append($editor);
+                }
+
+                setEditorStyle($element, opts);
+                setEditorState($element);
+                //$(document).on('click', closeDomEditor);
+                $currentTargetElement = $element;
+            });
         });
     }
 })(jQuery);
